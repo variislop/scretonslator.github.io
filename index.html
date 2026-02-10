@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>SoundCloud Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: #020617;
+      padding: 24px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+      font-size: 22px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #f97316;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #ea580c;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎵 Последний трек SoundCloud</h1>
+
+  <input
+    id="artist"
+    type="text"
+    placeholder="smile2peace"
+  />
+
+  <button onclick="redirectToLatest()">
+    Перейти к треку
+  </button>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+// ВАЖНО:
+// Получи свой client_id тут:
+// https://developers.soundcloud.com/
+// и вставь ниже
+
+const CLIENT_ID = "eJhyVaB1muqaDKXFFSe56FmlxmUDGEQe";
+
+async function redirectToLatest() {
+  const artist = document.getElementById("artist").value.trim();
+  const status = document.getElementById("status");
+
+  if (!artist) {
+    status.textContent = "Введите ник артиста";
+    return;
+  }
+
+  status.textContent = "Поиск последнего трека...";
+
+  try {
+    // Получаем пользователя
+    const userRes = await fetch(
+      `https://api-v2.soundcloud.com/resolve?url=https://soundcloud.com/${artist}&client_id=${CLIENT_ID}`
+    );
+
+    if (!userRes.ok) throw new Error("Артист не найден");
+
+    const user = await userRes.json();
+
+    // Получаем треки
+    const tracksRes = await fetch(
+      `https://api-v2.soundcloud.com/users/${user.id}/tracks?limit=1&client_id=${CLIENT_ID}`
+    );
+
+    if (!tracksRes.ok) throw new Error("Не удалось получить треки");
+
+    const data = await tracksRes.json();
+
+    if (!data.collection || data.collection.length === 0) {
+      throw new Error("У артиста нет треков");
+    }
+
+    const latest = data.collection[0];
+
+    status.textContent = "Перенаправление...";
+
+    // Переход на трек
+    window.location.href = latest.permalink_url;
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Ошибка: " + err.message;
+  }
+}
+</script>
+
+</body>
+</html>
