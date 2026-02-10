@@ -82,11 +82,6 @@
 </div>
 
 <script>
-// ВАЖНО:
-// Получи свой client_id тут:
-// https://developers.soundcloud.com/
-// и вставь ниже
-
 const CLIENT_ID = "eJhyVaB1muqaDKXFFSe56FmlxmUDGEQe";
 
 async function redirectToLatest() {
@@ -101,7 +96,7 @@ async function redirectToLatest() {
   status.textContent = "Поиск последнего трека...";
 
   try {
-    // Получаем пользователя
+
     const userRes = await fetch(
       `https://api-v2.soundcloud.com/resolve?url=https://soundcloud.com/${artist}&client_id=${CLIENT_ID}`
     );
@@ -110,7 +105,6 @@ async function redirectToLatest() {
 
     const user = await userRes.json();
 
-    // Получаем треки
     const tracksRes = await fetch(
       `https://api-v2.soundcloud.com/users/${user.id}/tracks?limit=1&client_id=${CLIENT_ID}`
     );
@@ -127,7 +121,6 @@ async function redirectToLatest() {
 
     status.textContent = "Перенаправление...";
 
-    // Переход на трек
     window.location.href = latest.permalink_url;
 
   } catch (err) {
